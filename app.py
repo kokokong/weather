@@ -57,6 +57,9 @@ def makeYqlQuery(req):
 	return "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "')"
 
 
+def celsius_to_fahrenheit(degree):
+    return  round((float(degree)-32)/1.8,2)
+
 def makeWebhookResult(data):
 	query = data.get('query')
 	if query is None:
@@ -81,9 +84,17 @@ def makeWebhookResult(data):
 		return {}
 
 	# print(json.dumps(item, indent=4))
+	temprature = celsius_to_fahrenheit((condition.get('temp')))
+	
+	print(condition.get('temp'))
+	print(type(float(condition.get('temp'))))
+	print(units.get('temperature'))
+	#speech = "Today in " + location.get('city') + "temperature : " + condition.get('text') + \
+	#		 ", the temperature is " + condition.get('temp') + " " + units.get('temperature')
+	
+	speech = "Today in " + location.get('city') + "temperature : " + condition.get('text') + \
+			 ", the temperature is " + str(temprature) + " C" 
 
-	speech = "Today in " + location.get('city') + ": " + condition.get('text') + \
-			 ", the temperature is " + condition.get('temp') + " " + units.get('temperature')
 
 	print("Response:")
 	print(speech)
@@ -91,12 +102,11 @@ def makeWebhookResult(data):
 	return {
 		"speech": speech,
 		"displayText": speech,
-		"data": {"slack": slack_message, "facebook": facebook_message},
 		# "contextOut": [],
 		"source": "apiai-weather-webhook-sample"
 	}
 
-
+    
 if __name__ == '__main__':
 	port = int(os.getenv('PORT', 5000))
 
